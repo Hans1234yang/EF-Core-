@@ -41,7 +41,7 @@ namespace web
                 {
                     optinons.EnableSensitiveDataLogging(true);
                     optinons.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-                });
+                },ServiceLifetime.Transient);//Transient 是修改离线数据
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

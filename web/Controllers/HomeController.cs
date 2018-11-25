@@ -18,10 +18,46 @@ namespace web.Controllers
         public MyContext _db2;
 
         //构造函数注入 ，上下文
-        public HomeController(MyContext db,MyContext db2)
+        public HomeController(MyContext db, MyContext db2)
         {
             _db = db;
             _db2 = db2;
+        }
+
+
+
+        //查询方法1： 预加载
+        public IActionResult EagerLoading1()
+        {
+            var province1 = _db.Provinces           //加载  四川省以及包含的市数据 
+                          .Include(x => x.Cities)
+                          .Where(x => x.Name == "四川")
+                          .ToList();
+
+            var province2 = _db.Provinces            /// 同等效果 
+                          .Include(x => x.Cities)
+                          .FirstOrDefault(x => x.Name == "四川");
+
+
+            //根据导航属性 多重 获取
+            var province3 = _db.Provinces    
+                           .Include(x => x.Cities)     //利用省份下的导航属性 城市列表
+                           .ThenInclude(x => x.CityCompanies)  //利用城市下的导航属性  ，城市公司列表
+                           .ThenInclude(x => x.Company)          //城市公司列表下的 关联属性  公司
+                           .Where(x => x.Name == "四川")
+                           .ToList();
+
+
+
+            //城市表的关联数据 加载出来
+            var city1 = _db.Cities             //省份， 城市公司，市长都是 城市的关联属性，是平级的 
+                      .Include(x => x.Province)
+                      .Include(x => x.CityCompanies)
+                      .Include(x => x.Mayor)
+                      .Where(y => y.Name == "成都")
+                      .ToList();
+
+            return View();
         }
 
 
@@ -32,8 +68,8 @@ namespace web.Controllers
             {
                 Name = "巴中市",
                 AreaCode = "6666",
-                ProvinceId=37   
-                
+                ProvinceId = 37
+
             };
             _db.Cities.Add(city1);
             _db.SaveChanges();
@@ -43,12 +79,12 @@ namespace web.Controllers
         //在现有 省份添加数据 
         public IActionResult Insert2()
         {
-            var province1 = _db.Provinces.Single(x=>x.Name=="四川");
+            var province1 = _db.Provinces.Single(x => x.Name == "四川");
 
             province1.Cities.Add(new City
             {
-                Name="达州",
-                AreaCode="2222"
+                Name = "达州",
+                AreaCode = "2222"
             });
 
             _db.SaveChanges();
@@ -113,9 +149,9 @@ namespace web.Controllers
 
             //判断2个上下文是否同一个上下文
             bool result;
-            if(_db==_db2)
+            if (_db == _db2)
             {
-                 result = true;
+                result = true;
             }
             else
             {   //并不是同一个上下文
@@ -131,29 +167,29 @@ namespace web.Controllers
         {
             var province1 = _db.Provinces.FirstOrDefault();
 
-            if(province1!=null)
+            if (province1 != null)
             {
                 province1.Population += 600;
 
                 _db.Provinces.Add(new Province
                 {
-                    Name="重庆",
-                    Population=30000000
+                    Name = "重庆",
+                    Population = 30000000
                 });
 
                 _db.SaveChanges();
             }
 
-            return View(); 
+            return View();
         }
 
 
         //修改
-        public  IActionResult Update()
+        public IActionResult Update()
         {
             var province1 = _db.Provinces.FirstOrDefault();
 
-            if(province1 != null)
+            if (province1 != null)
             {
                 province1.Population += 500;
                 _db.SaveChanges();
@@ -181,9 +217,9 @@ namespace web.Controllers
         public IActionResult Like()
         {
             var MyParam = "北%";
-            
+
             var province = _db.Provinces
-                         .Where( x => EF.Functions.Like(x.Name, MyParam))
+                         .Where(x => EF.Functions.Like(x.Name, MyParam))
                          .ToList();
 
             return View();
@@ -250,23 +286,23 @@ namespace web.Controllers
 
         public IActionResult Index()
         {
-            var Province1 = new Province
-            {
-                Name = "北京",
-                Population = 20000000
-            };
+            //var Province1 = new Province
+            //{
+            //    Name = "北京",
+            //    Population = 20000000
+            //};
 
-            _db.Provinces.Add(Province1);
-            //上下文根据 province实体
+            //_db.Provinces.Add(Province1);
+            ////上下文根据 province实体
 
-            _db.SaveChanges();
+            //_db.SaveChanges();
 
             return View();
         }
 
         //批量增加
         public IActionResult About()
-        {         
+        {
             var province1 = new Province
             {
                 Name = "北京",

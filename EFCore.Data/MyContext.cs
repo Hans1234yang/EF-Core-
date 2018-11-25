@@ -13,10 +13,12 @@ namespace EFCore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region   创建各个表
+
             //cityid 和companyid 作联合主键  
 
             //fluent api 方式配置
-           
+
 
             modelBuilder.Entity<City>().HasOne(x => x.Province).WithMany(x => x.Cities)
                                    .HasForeignKey(x=>x.ProvinceId);
@@ -32,6 +34,9 @@ namespace EFCore.Data
 
             modelBuilder.Entity<Mayor>()  //市长和 城市是一对一的关系
                 .HasOne(x=>x.City).WithOne(x=>x.Mayor).HasForeignKey<Mayor>(x=>x.CityId);
+
+            #endregion
+
         }
 
         public DbSet<Province> Provinces { get; set; }
